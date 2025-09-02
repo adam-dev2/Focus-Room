@@ -218,8 +218,8 @@ const RichTextEditor = () => {
 
   return (
    <>
-     <div className='h-full w-full m-10 mb-0 mt-0'>
-      <div className="w-full my-6 bg-white rounded-xl shadow-lg overflow-hidden">
+     <div className="w-full h-[60vh] bg-gray-50 flex flex-col m-[5%] mt-0 mb-0 rounded-2xl  border-1 border-gray-300">
+      {/* <div className="w-full border-1 border-zinc-300 h-fit bg-white rounded-xl shadow-lg "> */}
         {/* Header */}
         <div className="bg-gray-900 px-6 py-4">
           <h1 className="text-white text-2xl font-bold">QuickNote</h1>
@@ -233,7 +233,7 @@ const RichTextEditor = () => {
         <div className="relative">
           <EditorContent 
             editor={editor} 
-            className="min-h-[45vh] focus-within:bg-gray-50 transition-colors duration-200"
+            className=" focus-within:bg-gray-50 transition-colors duration-200"
           />
         </div>
 
@@ -254,7 +254,7 @@ const RichTextEditor = () => {
         </div>
 
       
-      </div>
+      {/* </div> */}
      </div>
    </>
   );
