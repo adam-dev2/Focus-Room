@@ -1,5 +1,9 @@
+import CodeEditor from './components/CodeEditor'
+import RichTextEditor from './components/RichTextEditor'
 import TextEditor from './components/TextEditor'
+import Tiptap from './components/Tiptap'
 import Dashboard from './pages/Dashboard'
+import { BrowserRouter as Router,Routes,Route } from 'react-router-dom'
 
 const App = () => {
   return (
@@ -10,7 +14,18 @@ const App = () => {
           <TextEditor />
         </div>
       </div> */}
-      <Dashboard />
+      <Router>
+        <Routes>
+          <Route path='/' element={<Dashboard />} />
+          <Route path='/text' element={<RichTextEditor />} />
+          <Route path='/code' element={<CodeEditor />} />
+        </Routes>
+      </Router>
+      {/* <Tiptap /> */}
+      {/* <div className='flex justify-between gap-10 bg-zinc-900 w-screen h-screen'>
+         <RichTextEditor />
+        <CodeEditor />
+      </div> */}
     </>
   )
 }
