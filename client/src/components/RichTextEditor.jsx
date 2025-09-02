@@ -218,8 +218,8 @@ const RichTextEditor = () => {
 
   return (
    <>
-     <div className='h-full w-full px-10'>
-      <div className="w-full my-8 bg-white rounded-xl shadow-lg overflow-hidden">
+     <div className='h-full w-full m-10 mb-0 mt-0'>
+      <div className="w-full my-6 bg-white rounded-xl shadow-lg overflow-hidden">
         {/* Header */}
         <div className="bg-gray-900 px-6 py-4">
           <h1 className="text-white text-2xl font-bold">QuickNote</h1>

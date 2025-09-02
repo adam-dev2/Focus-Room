@@ -3,6 +3,7 @@ import { Pen, Square, Circle, ArrowRight, Type, Hand, RotateCcw, RotateCw, Downl
 
 const Whiteboard = () => {
   const canvasRef = useRef(null);
+  const textInputRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState('pen');
   const [strokeColor, setStrokeColor] = useState('#000000');
@@ -10,6 +11,10 @@ const Whiteboard = () => {
   const [elements, setElements] = useState([]);
   const [currentElement, setCurrentElement] = useState(null);
   const [startPoint, setStartPoint] = useState(null);
+  const [isPanning, setIsPanning] = useState(false);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [lastPanPoint, setLastPanPoint] = useState(null);
+  const [textInput, setTextInput] = useState({ visible: false, x: 0, y: 0, value: '' });
 
   const tools = [
     { id: 'select', icon: Hand, name: 'Select' },
@@ -27,15 +32,27 @@ const Whiteboard = () => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     return {
+      x: (e.clientX - rect.left) - panOffset.x,
+      y: (e.clientY - rect.top) - panOffset.y
+    };
+  }, [panOffset]);
+
+  const getScreenPos = useCallback((e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    return {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
     };
   }, []);
 
   const drawElement = useCallback((ctx, element) => {
+    ctx.save();
+    ctx.translate(panOffset.x, panOffset.y);
+    
     ctx.strokeStyle = element.strokeColor;
     ctx.lineWidth = element.strokeWidth;
-    ctx.fillStyle = 'transparent';
+    ctx.fillStyle = element.strokeColor;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
@@ -95,8 +112,15 @@ const Whiteboard = () => {
         );
         ctx.stroke();
         break;
+      
+      case 'text':
+        ctx.font = `${element.fontSize || 16}px Arial`;
+        ctx.fillText(element.text, element.x, element.y);
+        break;
     }
-  }, []);
+    
+    ctx.restore();
+  }, [panOffset]);
 
   const redraw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -122,7 +146,28 @@ const Whiteboard = () => {
   }, [redraw]);
 
   const handleMouseDown = useCallback((e) => {
-    if (tool === 'select') return;
+    const screenPos = getScreenPos(e);
+    
+    // Handle text tool click
+    if (tool === 'text') {
+      const pos = getMousePos(e);
+      setTextInput({
+        visible: true,
+        x: screenPos.x,
+        y: screenPos.y,
+        value: '',
+        canvasX: pos.x,
+        canvasY: pos.y
+      });
+      return;
+    }
+    
+    // Handle panning with hand tool
+    if (tool === 'select') {
+      setIsPanning(true);
+      setLastPanPoint(screenPos);
+      return;
+    }
     
     const pos = getMousePos(e);
     setIsDrawing(true);
@@ -148,9 +193,25 @@ const Whiteboard = () => {
       };
       setCurrentElement(newElement);
     }
-  }, [tool, getMousePos, strokeColor, strokeWidth]);
+  }, [tool, getMousePos, getScreenPos, strokeColor, strokeWidth]);
 
   const handleMouseMove = useCallback((e) => {
+    const screenPos = getScreenPos(e);
+    
+    // Handle panning
+    if (isPanning && lastPanPoint) {
+      const deltaX = screenPos.x - lastPanPoint.x;
+      const deltaY = screenPos.y - lastPanPoint.y;
+      
+      setPanOffset(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+      
+      setLastPanPoint(screenPos);
+      return;
+    }
+    
     if (!isDrawing || !currentElement) return;
 
     const pos = getMousePos(e);
@@ -167,20 +228,52 @@ const Whiteboard = () => {
         endY: pos.y
       }));
     }
-  }, [isDrawing, currentElement, tool, getMousePos]);
+  }, [isDrawing, currentElement, tool, getMousePos, getScreenPos, isPanning, lastPanPoint]);
 
   const handleMouseUp = useCallback(() => {
+    if (isPanning) {
+      setIsPanning(false);
+      setLastPanPoint(null);
+      return;
+    }
+    
     if (!isDrawing || !currentElement) return;
 
     setElements(prev => [...prev, currentElement]);
     setCurrentElement(null);
     setIsDrawing(false);
     setStartPoint(null);
-  }, [isDrawing, currentElement]);
+  }, [isDrawing, currentElement, isPanning]);
+
+  const handleTextSubmit = useCallback((e) => {
+    if (e.key === 'Enter' || e.type === 'blur') {
+      if (textInput.value.trim()) {
+        const textElement = {
+          type: 'text',
+          x: textInput.canvasX,
+          y: textInput.canvasY,
+          text: textInput.value,
+          strokeColor,
+          fontSize: 16
+        };
+        setElements(prev => [...prev, textElement]);
+      }
+      setTextInput({ visible: false, x: 0, y: 0, value: '', canvasX: 0, canvasY: 0 });
+    }
+  }, [textInput, strokeColor]);
+
+  const getCursorStyle = () => {
+    if (tool === 'select') return 'grab';
+    if (isPanning) return 'grabbing';
+    if (tool === 'text') return 'text';
+    return 'crosshair';
+  };
 
   const handleClear = () => {
     setElements([]);
     setCurrentElement(null);
+    setPanOffset({ x: 0, y: 0 });
+    setTextInput({ visible: false, x: 0, y: 0, value: '', canvasX: 0, canvasY: 0 });
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -208,9 +301,9 @@ const Whiteboard = () => {
   }, [redraw]);
 
   return (
-    <div className="w-full h-[60vh]  flex flex-col rounded-2xl overflow-hidden m-10 mb-0 mt-0">
+    <div className="w-full h-[60vh] bg-gray-50 flex flex-col m-10 mt-0 mb-0 rounded-2xl overflow-hidden border-1 border-gray-300">
       {/* Top Toolbar */}
-      <div className="bg-white border-b border-gray-200 p-3 flex items-center justify-between ">
+      <div className="bg-white border-b border-gray-200 p-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Tool Selection */}
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
@@ -314,15 +407,39 @@ const Whiteboard = () => {
       <div className="flex-1 relative overflow-hidden">
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full bg-white cursor-crosshair"
+          className="absolute inset-0 w-full h-full bg-white"
+          style={{ cursor: getCursorStyle() }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={() => {
             setIsDrawing(false);
             setCurrentElement(null);
+            setIsPanning(false);
+            setLastPanPoint(null);
           }}
         />
+        
+        {/* Text Input */}
+        {textInput.visible && (
+          <input
+            ref={textInputRef}
+            type="text"
+            value={textInput.value}
+            onChange={(e) => setTextInput(prev => ({ ...prev, value: e.target.value }))}
+            onKeyDown={handleTextSubmit}
+            onBlur={handleTextSubmit}
+            autoFocus
+            className="absolute border-none outline-none bg-transparent text-black font-mono"
+            style={{
+              left: textInput.x,
+              top: textInput.y,
+              fontSize: '16px',
+              color: strokeColor,
+              zIndex: 1000
+            }}
+          />
+        )}
         
         {/* Grid Pattern */}
         <div 
