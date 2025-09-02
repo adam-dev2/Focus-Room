@@ -233,7 +233,7 @@ const RichTextEditor = () => {
         <div className="relative">
           <EditorContent 
             editor={editor} 
-            className="min-h-[400px] focus-within:bg-gray-50 transition-colors duration-200"
+            className="min-h-[45vh] focus-within:bg-gray-50 transition-colors duration-200"
           />
         </div>
 

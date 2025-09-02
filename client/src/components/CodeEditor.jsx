@@ -41,7 +41,7 @@ export default CodeEditor
                 <p className="text-blue-100 text-sm">Code some mindfull content with our VS-style code editor</p>
               </div>
               <Editor 
-                  height='90vh'
+                  height='55vh'
                   defaultLanguage='javascript'
                   defaultValue={codeString}
                   theme='vs-dark' 

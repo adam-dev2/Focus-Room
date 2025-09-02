@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom'
 import RichTextEditor from '../components/RichTextEditor';
 import CodeEditor from '../components/CodeEditor';
 import PomodoroTimer from '../components/PomodoroTimer';
+import Whiteboard from '../components/Whiteboard';
 
 const Dashboard = () => {
 
@@ -13,19 +14,19 @@ const Dashboard = () => {
     const [promodora,setPromodora] = useState(false);
 
     const handleCodeEditor = () => {
-        setCodeEditor(!codeEditor)
+        setCodeEditor(true)
         if(textEditor) setTextEditor(!textEditor)
         if(whiteboard) setWhiteboard(!whiteboard)
         if(promodora) setPromodora(!promodora)
     }
     const handleTextEditor = () => {
-        setTextEditor(!textEditor)
+        setTextEditor(true)
         if(codeEditor) setCodeEditor(!codeEditor)
         if(whiteboard) setWhiteboard(!whiteboard)
         if(promodora) setPromodora(!promodora)
     }
     const handleWhiteboard = () => {
-        setWhiteboard(!whiteboard)
+        setWhiteboard(true)
         if(textEditor) {
             setTextEditor(!textEditor)
         }
@@ -37,7 +38,7 @@ const Dashboard = () => {
         }
     }
     const handlePromodora = () => {
-        setPromodora(!whiteboard)
+        setPromodora(true)
         if(textEditor) {
             setTextEditor(!textEditor)
         }
@@ -51,7 +52,7 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen w-screen bg-zinc-200 flex items-center justify-center">
-      <section className="w-3/4 h-3/4 border border-zinc-300  shadow-2xl rounded-xl overflow-hidden flex flex-col">
+      <section className="w-3/4 h-3/4 border border-zinc-300  shadow-2xl rounded-xl overflow-auto flex flex-col">
         <navbar  className="flex max-w-3xl w-xl justify-between mt-4 bg-zinc-200/30 text-white font-sans rounded-2xl shadow-lg px-5 py-2 gap-3 m-auto text-center">
           <h1 className="font-sans font-light text-md hover:text-zinc-900 cursor-pointer hover:scale-105 transition text-gray-700" onClick={handleWhiteboard}>
             Sketchboard
@@ -72,6 +73,7 @@ const Dashboard = () => {
           { textEditor && <RichTextEditor />}
           {codeEditor && <CodeEditor />}
           {promodora && <PomodoroTimer />}
+          {whiteboard && <Whiteboard />}
           {!codeEditor && !textEditor && !whiteboard && !promodora && <div><h1>Hello !!</h1> <p>Navigate to the suitable sections</p> </div>}
         </div>
 
