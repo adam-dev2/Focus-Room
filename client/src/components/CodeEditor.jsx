@@ -43,7 +43,7 @@ export default CodeEditor
                 <Editor 
                   height='50vh'
                   defaultLanguage='javascript'
-                  defaultValue={codeString}
+                  defaultValue='console.log("Adam")'
                   theme='vs-dark' 
               />
           </div>

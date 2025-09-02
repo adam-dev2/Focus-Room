@@ -3,6 +3,7 @@ import RichTextEditor from './components/RichTextEditor'
 import TextEditor from './components/TextEditor'
 import Tiptap from './components/Tiptap'
 import Whiteboard from './components/Whiteboard'
+import CentralBoard from './pages/CentralBoard'
 import Dashboard from './pages/Dashboard'
 import { BrowserRouter as Router,Routes,Route } from 'react-router-dom'
 
@@ -15,13 +16,16 @@ const App = () => {
           <TextEditor />
         </div>
       </div> */}
+      <div className="h-screen w-screen flex items-center justify-center">
       <Router>
         <Routes>
-          <Route path='/' element={<Dashboard />} />
+          <Route path='/' element={<CentralBoard />} />
+          <Route path='/focus-room' element={<Dashboard />} />
           <Route path='/text' element={<RichTextEditor />} />
           <Route path='/code' element={<CodeEditor />} />
         </Routes>
       </Router>
+      </div>
       {/* <Whiteboard /> */}
       {/* <Tiptap /> */}
       {/* <div className='flex justify-between gap-10 bg-zinc-900 w-screen h-screen'>
