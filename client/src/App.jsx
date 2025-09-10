@@ -3,6 +3,8 @@ import RichTextEditor from './components/RichTextEditor'
 import TextEditor from './components/TextEditor'
 import Tiptap from './components/Tiptap'
 import Whiteboard from './components/Whiteboard'
+import GoogleDashboard from './GoogleDashboard'
+import GoogleLogin from './GoogleLogin'
 import CentralBoard from './pages/CentralBoard'
 import Dashboard from './pages/Dashboard'
 import { BrowserRouter as Router,Routes,Route } from 'react-router-dom'
@@ -20,6 +22,8 @@ const App = () => {
       <Router>
         <Routes>
           <Route path='/' element={<CentralBoard />} />
+          <Route path='/login' element={<GoogleLogin />} />
+          <Route path='/googledashboard' element={<GoogleDashboard />} />
           <Route path='/focus-room' element={<Dashboard />} />
           <Route path='/text' element={<RichTextEditor />} />
           <Route path='/code' element={<CodeEditor />} />

@@ -3,9 +3,12 @@ const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const bcrypt = require('bcryptjs')
 
+
 const app = express();
 const PORT =  5001;
-import User from './models/User';
+const User = require('./models/User.js');
+const { default: connectDB } = require('./utils/connectDB');
+connectDB();    
 
 app.use(bodyParser.json());
 
