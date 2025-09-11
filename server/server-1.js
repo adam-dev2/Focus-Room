@@ -6,6 +6,8 @@ import './passport.js';
 import passport from "passport";
 import cors from 'cors';
 import dotenv from 'dotenv';
+import Code from "./models/Code.js";
+import bodyParser from "body-parser";
 dotenv.config();
 
 const app = express();
@@ -15,6 +17,8 @@ app.use(cors({
 }))
 
 mongoose.connect(process.env.MONGO_URI);
+
+app.use(bodyParser.json())
 
 app.use(session({
     secret: 's3cr3tk3y',
@@ -56,6 +60,21 @@ app.get('/auth/logout',(req,res) => {
     })
 })
 
+app.post('/api/code-snippet',async(req,res) => {
+    const {code,language,name} = req.body;
+    try{
+        let findCode = await Code.findOne({name});
+        if(!findCode){
+            findCode = new Code({code,language,name});
+            await findCode.save();
+            return res.status(201).json({message: `Code snippet saved successfully ${name}`});
+        }
+        return res.status(400).json({message: `Code snippet with this name already exists`});
+
+    }catch(err) {
+        return res.status(500).json({message: `Internal Server Error: ${err}`});
+    }
+})
 
 app.listen(process.env.PORT,()=>{
     console.log(`Server is running on port: ${process.env.PORT}`);
