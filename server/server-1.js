@@ -8,6 +8,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import Code from "./models/Code.js";
 import bodyParser from "body-parser";
+import { authenticate } from "./middleware/authenticate.js";
 dotenv.config();
 
 const app = express();
@@ -60,20 +61,37 @@ app.get('/auth/logout',(req,res) => {
     })
 })
 
-app.post('/api/code-snippet',async(req,res) => {
+app.get('/api/code-snippet',(req,res) => {
+    return res.status(200).json({message:'Endpoint health check'})
+})
+
+app.post('/api/code-snippet',authenticate,async(req,res) => {
     const {code,language,name} = req.body;
+    const userID = req.user.id
+    console.log(userID,code,language,name);
+    if(!userID) {
+        return res.status(403).json({messsage:'Please login first'});
+    }
+    if(!code || !language || !name) {
+        return res.status(400).json({message: 'All fields are required'})
+    }
     try{
         let findCode = await Code.findOne({name});
         if(!findCode){
-            findCode = new Code({code,language,name});
+            findCode = new Code({googleId:userID, code,language,name});
             await findCode.save();
             return res.status(201).json({message: `Code snippet saved successfully ${name}`});
         }
         return res.status(400).json({message: `Code snippet with this name already exists`});
 
     }catch(err) {
+        console.log(err)
         return res.status(500).json({message: `Internal Server Error: ${err}`});
     }
+})
+
+app.get('/api',(req,res) =>{
+    return res.status(200).json({message:'server health check'})
 })
 
 app.listen(process.env.PORT,()=>{
